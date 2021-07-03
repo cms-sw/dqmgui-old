@@ -40,7 +40,7 @@
 #undef HAVE_PROTOTYPES  // conflict between python and libjpeg
 #undef HAVE_STDLIB_H    // conflict between python and libjpeg
 #include "boost/algorithm/string.hpp"
-#include "boost/gil/extension/io/jpeg_io.hpp"
+#include "boost/gil/extension/io/jpeg/old.hpp"
 #include "boost/gil/extension/io/png_io.hpp"
 #include "boost/gil/extension/numeric/convolve.hpp"
 #include "boost/gil/extension/numeric/kernel.hpp"
