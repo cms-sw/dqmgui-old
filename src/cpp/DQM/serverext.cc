@@ -30,7 +30,20 @@
 #include "classlib/utils/Signal.h"
 #include "classlib/utils/StringFormat.h"
 #include "classlib/utils/StringOps.h"
-#include "classlib/utils/TimeInfo.h"
+#include "classlib/utils/TimeInfo.h" 
+
+#include "boost/gil/typedefs.hpp" 
+namespace boost { 
+  namespace gil {
+    typedef uint8_t  bits8;
+    typedef uint16_t bits16;
+    typedef uint32_t bits32;
+    typedef int8_t   bits8s;
+    typedef int16_t  bits16s;
+    typedef int32_t  bits32s;
+    typedef float32_t bits32f;
+  }
+}
 
 #include "boost/gil/image.hpp"
 #include "boost/gil/typedefs.hpp"
@@ -41,7 +54,7 @@
 #undef HAVE_STDLIB_H    // conflict between python and libjpeg
 #include "boost/algorithm/string.hpp"
 #include "boost/gil/extension/io/jpeg/old.hpp"
-#include "boost/gil/extension/io/png_io.hpp"
+#include "boost/gil/extension/io/png/old.hpp"
 #include "boost/gil/extension/numeric/convolve.hpp"
 #include "boost/gil/extension/numeric/kernel.hpp"
 #include "boost/gil/extension/numeric/resample.hpp"
@@ -1780,11 +1793,14 @@ class VisDQMRenderLink {
 
     try {
       if ((png = open_memstream(&pngdata, &pngsize))) {
-        using namespace boost::gil;
-        boost::gil::detail::png_writer writer(png);
-        writer.apply(interleaved_view(img.width, img.height,
-                                      (const rgb8_pixel_t *)&imgbytes[0],
-                                      img.width * 3));
+        // old boost::gil =============
+        // using namespace boost::gil;
+        // boost::gil::detail::png_writer writer(png);
+        // writer.apply(interleaved_view(img.width, img.height, (const rgb8_pixel_t *)&imgbytes[0], img.width * 3));
+
+        // new boost::gil =============
+        boost::gil::write_view(png, boost::gil::interleaved_view(img.width, img.height, (boost::gil::rgb8_pixel_t *)&imgbytes[0], img.width * 3), boost::gil::png_tag{} );
+
         fflush(png);
         pngbytes.append(pngdata, pngsize);
         fclose(png);
@@ -1865,7 +1881,7 @@ class VisDQMRenderLink {
         assert(srcimg.inuse > 0);
         srcimg.inuse--;
         assert(img.inuse > 0);
-        if (!srcbytes.empty()) resizeimg(srcbytes, img, protoreq);
+        if (!srcbytes.empty()) resizeimg(srcbytes, img, protoreq); // void resizeimg(std::string &imgdata, Image &destimg, const Image &srcspec
 
         if (!srcbytes.empty()) compress(img, srcbytes);
       }
@@ -1924,11 +1940,11 @@ class VisDQMRenderLink {
       imgbytes.resize(img.width * img.height * 3, '\0');
       if ((png = fmemopen(const_cast<char *>(&img.pngbytes[0]),
                           img.pngbytes.size(), "r"))) {
-        using namespace boost::gil;
-        boost::gil::detail::png_reader reader(png);
-        reader.apply(interleaved_view(img.width, img.height,
-                                      (rgb8_pixel_t *)&imgbytes[0],
-                                      img.width * 3));
+        // using namespace boost::gil;
+        // boost::gil::detail::png_reader reader(png);
+        // reader.apply(interleaved_view(img.width, img.height, (rgb8_pixel_t *)&imgbytes[0], img.width * 3));
+        boost::gil::read_view(png, boost::gil::interleaved_view(img.width, img.height, (boost::gil::rgb8_pixel_t *)&imgbytes[0], img.width * 3), boost::gil::png_tag{} );
+
         fclose(png);
         png = 0;
       }
